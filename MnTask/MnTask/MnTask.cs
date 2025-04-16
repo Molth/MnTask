@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 #pragma warning disable CS1591
 #pragma warning disable CS8632
 
+// ReSharper disable ALL
+
 namespace Erinn
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -39,6 +41,8 @@ namespace Erinn
             var promise = Promise;
             if (promise != null && promise.SequenceNumber == SequenceNumber)
             {
+                Debug.Assert(promise.State == MnTaskResult.Running || promise.State == MnTaskResult.Pending || promise.State == MnTaskResult.NotStarted);
+
                 promise.Callback = null;
 
                 switch (promise.State)
@@ -49,14 +53,12 @@ namespace Erinn
 
                     case MnTaskResult.Pending:
                         promise.State = MnTaskResult.NotStarted;
+
                         promise.Queue.Push(promise);
                         break;
 
                     case MnTaskResult.NotStarted:
                         break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
             }
         }
@@ -67,6 +69,8 @@ namespace Erinn
             var promise = Promise;
             if (promise != null && promise.SequenceNumber == SequenceNumber)
             {
+                Debug.Assert(promise.State == MnTaskResult.Running || promise.State == MnTaskResult.Pending || promise.State == MnTaskResult.NotStarted);
+
                 var callback = promise.Callback;
                 promise.Callback = null;
 
@@ -75,19 +79,18 @@ namespace Erinn
                     case MnTaskResult.Running:
                         promise.State = MnTaskResult.Canceled;
 
+                        Debug.Assert(callback != null);
                         callback?.Invoke();
                         break;
 
                     case MnTaskResult.Pending:
                         promise.State = MnTaskResult.NotStarted;
+
                         promise.Queue.Push(promise);
                         break;
 
                     case MnTaskResult.NotStarted:
                         break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
             }
         }
@@ -121,8 +124,7 @@ namespace Erinn
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UnsafeOnCompleted(Action continuation)
         {
-            if (continuation == null)
-                throw new NullReferenceException();
+            Debug.Assert(continuation != null);
 
             var promise = Promise;
 

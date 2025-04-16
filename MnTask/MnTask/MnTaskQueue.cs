@@ -7,11 +7,13 @@ using System.Runtime.CompilerServices;
 #pragma warning disable CS1591
 #pragma warning disable CS8632
 
+// ReSharper disable ALL
+
 namespace Erinn
 {
     public sealed class MnTaskQueue
     {
-        private (MnTaskPromise Element, MnTaskPriority Priority)[] _nodes;
+        private MnTaskPromise?[] _nodes;
         private readonly Stack<MnTaskPromise> _freeList;
         private int _size;
         private uint _sequenceNumber;
@@ -22,9 +24,11 @@ namespace Erinn
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "MustBeNonNegative");
+
             if (capacity < 4)
                 capacity = 4;
-            _nodes = new (MnTaskPromise, MnTaskPriority)[capacity];
+
+            _nodes = new MnTaskPromise[capacity];
             _freeList = new Stack<MnTaskPromise>(capacity);
             _size = 0;
             _sequenceNumber = 0;
@@ -36,8 +40,10 @@ namespace Erinn
         {
             if (!_freeList.TryPop(out var promise))
                 promise = new MnTaskPromise(this);
+
             promise.SequenceNumber = ++_sequenceNumber;
             promise.State = MnTaskResult.Pending;
+
             return new MnTask(delay, _sequenceNumber, promise);
         }
 
@@ -48,33 +54,35 @@ namespace Erinn
 
             while (_size != 0)
             {
-                var (promise, priority) = _nodes[0];
-                if (priority.Timestamp > timestamp)
+                var node = _nodes[0];
+
+                if (node!.Timestamp > timestamp)
                 {
-                    label:
-                    if (promise.Callback == null)
+                    for (; node!.Callback == null; node = _nodes[0])
                     {
                         RemoveRootNode();
-                        _freeList.Push(promise);
-                        if (promise.State == MnTaskResult.Running)
-                            throw new NullReferenceException();
+                        _freeList.Push(node);
 
-                        if (_size != 0)
-                        {
-                            promise = _nodes[0].Element;
-                            goto label;
-                        }
+                        Debug.Assert(node.State == MnTaskResult.Canceled || node.State == MnTaskResult.Stopped);
+
+                        if (_size == 0)
+                            break;
                     }
 
                     break;
                 }
 
                 RemoveRootNode();
-                _freeList.Push(promise);
-                promise.State = MnTaskResult.Success;
+                _freeList.Push(node);
 
-                var callback = promise.Callback;
-                promise.Callback = null;
+                Debug.Assert(node.State == MnTaskResult.Running);
+
+                node.State = MnTaskResult.Success;
+
+                var callback = node.Callback;
+                node.Callback = null;
+
+                Debug.Assert(callback != null);
                 callback?.Invoke();
             }
         }
@@ -82,8 +90,17 @@ namespace Erinn
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            _nodes.AsSpan().Clear();
-            _freeList.Clear();
+            for (var i = 0; i < _size; ++i)
+            {
+                var node = _nodes[i]!;
+
+                node.State = MnTaskResult.Fault;
+                node.Callback = null;
+
+                _freeList.Push(node);
+            }
+
+            Array.Clear(_nodes);
             _size = 0;
         }
 
@@ -92,16 +109,15 @@ namespace Erinn
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Enqueue(float delay, uint sequenceNumber, MnTaskPromise promise, Action callback)
         {
+            promise.Timestamp = _timestamp + delay;
             promise.State = MnTaskResult.Running;
             promise.Callback = callback;
-            MnTaskPriority priority;
-            priority.Timestamp = _timestamp + delay;
-            priority.SequenceNumber = sequenceNumber;
+
             var size = _size;
             if (_nodes.Length == size)
                 Grow(size + 1);
             _size = size + 1;
-            MoveUp((promise, priority), size);
+            MoveUp(promise, size);
         }
 
         [DebuggerHidden]
@@ -118,8 +134,8 @@ namespace Erinn
             var newSize = Math.Max(newCapacity, _nodes.Length + 4);
             if (newSize < capacity)
                 newSize = capacity;
-            var nodes = new (MnTaskPromise, MnTaskPriority)[newSize];
-            _nodes.AsSpan().CopyTo(nodes.AsSpan());
+            var nodes = new MnTaskPromise[newSize];
+            Array.Copy(_nodes, 0, nodes, 0, _size);
             _nodes = nodes;
         }
 
@@ -129,23 +145,23 @@ namespace Erinn
             var index = --_size;
             if (index > 0)
             {
-                (MnTaskPromise, MnTaskPriority) node = _nodes[index];
-                MoveDown(node, 0);
+                var node = _nodes[index];
+                MoveDown(node!, 0);
             }
 
-            _nodes[index] = default;
+            _nodes[index] = null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void MoveUp(in (MnTaskPromise Element, MnTaskPriority Priority) node, int nodeIndex)
+        private void MoveUp(MnTaskPromise? node, int nodeIndex)
         {
             var nodes = _nodes;
             int parentIndex;
             for (; nodeIndex > 0; nodeIndex = parentIndex)
             {
                 parentIndex = (nodeIndex - 1) >> 2;
-                var tuple = nodes[parentIndex];
-                if (node.Priority.CompareTo(tuple.Priority) < 0)
+                var tuple = nodes[parentIndex]!;
+                if (node!.CompareTo(tuple) < 0)
                     nodes[nodeIndex] = tuple;
                 else
                     break;
@@ -155,27 +171,27 @@ namespace Erinn
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void MoveDown(in (MnTaskPromise Element, MnTaskPriority Priority) node, int nodeIndex)
+        private void MoveDown(MnTaskPromise? node, int nodeIndex)
         {
             var nodes = _nodes;
             int firstChildIndex;
             int num1;
             for (var size = _size; (firstChildIndex = (nodeIndex << 2) + 1) < size; nodeIndex = num1)
             {
-                var valueTuple = nodes[firstChildIndex];
+                var valueTuple = nodes[firstChildIndex]!;
                 num1 = firstChildIndex;
                 var num2 = Math.Min(firstChildIndex + 4, size);
                 while (++firstChildIndex < num2)
                 {
-                    var tuple = nodes[firstChildIndex];
-                    if (tuple.Priority.CompareTo(valueTuple.Priority) < 0)
+                    var tuple = nodes[firstChildIndex]!;
+                    if (tuple.CompareTo(valueTuple) < 0)
                     {
                         valueTuple = tuple;
                         num1 = firstChildIndex;
                     }
                 }
 
-                if (node.Priority.CompareTo(valueTuple.Priority) > 0)
+                if (node!.CompareTo(valueTuple) > 0)
                     nodes[nodeIndex] = valueTuple;
                 else
                     break;
