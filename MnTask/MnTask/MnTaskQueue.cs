@@ -100,7 +100,7 @@ namespace Erinn
                 _freeList.Push(node);
             }
 
-            Array.Clear(_nodes);
+            Array.Clear(_nodes, 0, _size);
             _size = 0;
         }
 
