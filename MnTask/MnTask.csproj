@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.1</TargetFrameworks>
+        <RootNamespace>MnTask</RootNamespace>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <PackageId>MnTask</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Molth Nevin</Authors>
+        <Company>Hell</Company>
+        <Description>A simple single-thread timer.</Description>
+        <PackageProjectUrl>https://github.com/Molth/MnTask</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>async/await;timer;performance</PackageTags>
+
+        <PackageOutputPath>./nupkgs</PackageOutputPath>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <SolutionRoot>$(MSBuildThisFileDirectory)../</SolutionRoot>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(SolutionRoot)README.md">
+            <Pack>true</Pack>
+            <PackagePath>\</PackagePath>
+            <Link>README.md</Link>
+        </None>
+
+        <None Include="$(SolutionRoot)LICENSE">
+            <Pack>true</Pack>
+            <PackagePath>\</PackagePath>
+            <Link>LICENSE</Link>
+        </None>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <Target Name="CleanPackageOutputPath" BeforeTargets="GenerateNuspec">
+        <RemoveDir Directories="$(PackageOutputPath)" />
+        <MakeDir Directories="$(PackageOutputPath)" />
+    </Target>
+
+</Project>
