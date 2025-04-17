@@ -17,7 +17,7 @@ namespace Erinn
         private readonly Stack<MnTaskPromise> _freeList;
         private int _size;
         private uint _sequenceNumber;
-        private float _timestamp;
+        private ulong _timestamp;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MnTaskQueue(int capacity)
@@ -32,11 +32,11 @@ namespace Erinn
             _freeList = new Stack<MnTaskPromise>(capacity);
             _size = 0;
             _sequenceNumber = 0;
-            _timestamp = 0.0f;
+            _timestamp = 0UL;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public MnTask Create(float delay)
+        public MnTask Create(ulong delay)
         {
             if (!_freeList.TryPop(out var promise))
                 promise = new MnTaskPromise(this);
@@ -48,7 +48,7 @@ namespace Erinn
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Update(float timestamp)
+        public void Update(ulong timestamp)
         {
             _timestamp = timestamp;
 
@@ -107,7 +107,7 @@ namespace Erinn
         [DebuggerHidden]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Enqueue(float delay, uint sequenceNumber, MnTaskPromise promise, Action callback)
+        internal void Enqueue(ulong delay, uint sequenceNumber, MnTaskPromise promise, Action callback)
         {
             promise.Timestamp = _timestamp + delay;
             promise.State = MnTaskResult.Running;

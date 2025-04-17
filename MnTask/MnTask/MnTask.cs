@@ -15,12 +15,12 @@ namespace Erinn
     [AsyncMethodBuilder(typeof(MnTaskAsyncMethodBuilder))]
     public readonly struct MnTask : ICriticalNotifyCompletion
     {
-        internal readonly float Delay;
+        internal readonly ulong Delay;
         internal readonly uint SequenceNumber;
         internal readonly MnTaskPromise? Promise;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal MnTask(float delay, uint sequenceNumber, MnTaskPromise promise)
+        internal MnTask(ulong delay, uint sequenceNumber, MnTaskPromise promise)
         {
             Delay = delay;
             SequenceNumber = sequenceNumber;

@@ -12,7 +12,7 @@ namespace Erinn
     internal sealed class MnTaskPromise : IComparable<MnTaskPromise>
     {
         public readonly MnTaskQueue Queue;
-        public float Timestamp;
+        public ulong Timestamp;
         public uint SequenceNumber;
         public MnTaskResult State;
         public Action? Callback;
