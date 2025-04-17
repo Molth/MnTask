@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 namespace Erinn
 {
     [StructLayout(LayoutKind.Sequential)]
-    [AsyncMethodBuilder(typeof(MnTaskAsyncMethodBuilder))]
     public readonly struct MnTask : ICriticalNotifyCompletion
     {
         internal readonly ulong Delay;
