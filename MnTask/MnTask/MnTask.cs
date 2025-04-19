@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 namespace Erinn
 {
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct MnTask : ICriticalNotifyCompletion
+    public readonly partial struct MnTask : ICriticalNotifyCompletion
     {
         internal readonly ulong Delay;
         internal readonly uint SequenceNumber;

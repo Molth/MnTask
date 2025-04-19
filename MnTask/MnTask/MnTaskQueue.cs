@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace Erinn
 {
-    public sealed class MnTaskQueue
+    internal sealed class MnTaskQueue
     {
         private MnTaskPromise?[] _nodes;
         private readonly Stack<MnTaskPromise> _freeList;
