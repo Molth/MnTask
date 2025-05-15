@@ -27,6 +27,13 @@ namespace Erinn
         public static MnTaskQueue LateUpdateQueue;
         public static MnTaskQueue FixedUpdateQueue;
 
+        public static object TimeQueueLock;
+        public static object UnscaledTimeQueueLock;
+
+        public static object UpdateQueueLock;
+        public static object LateUpdateQueueLock;
+        public static object FixedUpdateQueueLock;
+
         public static ulong UpdateFrames;
         public static ulong LateUpdateFrames;
         public static ulong FixedUpdateFrames;
@@ -46,6 +53,13 @@ namespace Erinn
             UpdateQueue = new MnTaskQueue(MN_TASK_QUEUE_INITIAL_CAPACITY);
             LateUpdateQueue = new MnTaskQueue(MN_TASK_QUEUE_INITIAL_CAPACITY);
             FixedUpdateQueue = new MnTaskQueue(MN_TASK_QUEUE_INITIAL_CAPACITY);
+
+            TimeQueueLock = new object();
+            UnscaledTimeQueueLock = new object();
+
+            UpdateQueueLock = new object();
+            LateUpdateQueueLock = new object();
+            FixedUpdateQueueLock = new object();
 
             UpdateFrames = 0;
             LateUpdateFrames = 0;
@@ -101,11 +115,20 @@ namespace Erinn
                 callback?.Invoke();
             }
 
-            TimeQueue.Update(ToNanoSeconds(Time.time));
+            lock (TimeQueueLock)
+            {
+                TimeQueue.Update(ToNanoSeconds(Time.time));
+            }
 
-            UnscaledTimeQueue.Update(ToNanoSeconds(Time.unscaledTime));
+            lock (UnscaledTimeQueueLock)
+            {
+                UnscaledTimeQueue.Update(ToNanoSeconds(Time.unscaledTime));
+            }
 
-            UpdateQueue.Update(++UpdateFrames);
+            lock (UpdateQueueLock)
+            {
+                UpdateQueue.Update(++UpdateFrames);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -117,7 +140,10 @@ namespace Erinn
                 callback?.Invoke();
             }
 
-            LateUpdateQueue.Update(++LateUpdateFrames);
+            lock (LateUpdateQueueLock)
+            {
+                LateUpdateQueue.Update(++LateUpdateFrames);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,7 +155,10 @@ namespace Erinn
                 callback?.Invoke();
             }
 
-            FixedUpdateQueue.Update(++FixedUpdateFrames);
+            lock (FixedUpdateQueueLock)
+            {
+                FixedUpdateQueue.Update(++FixedUpdateFrames);
+            }
         }
     }
 }

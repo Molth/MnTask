@@ -41,10 +41,16 @@ namespace Erinn
             switch (type)
             {
                 case PlayerLoopTiming.Time:
-                    return PlayerLoopHelpers.TimeQueue.Create(PlayerLoopHelpers.ToNanoSeconds(seconds));
+                    lock (PlayerLoopHelpers.TimeQueueLock)
+                    {
+                        return PlayerLoopHelpers.TimeQueue.Create(PlayerLoopHelpers.ToNanoSeconds(seconds));
+                    }
 
                 case PlayerLoopTiming.UnscaledTime:
-                    return PlayerLoopHelpers.UnscaledTimeQueue.Create(PlayerLoopHelpers.ToNanoSeconds(seconds));
+                    lock (PlayerLoopHelpers.UnscaledTimeQueueLock)
+                    {
+                        return PlayerLoopHelpers.UnscaledTimeQueue.Create(PlayerLoopHelpers.ToNanoSeconds(seconds));
+                    }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -57,13 +63,22 @@ namespace Erinn
             switch (type)
             {
                 case PlayerLoopTiming.Update:
-                    return PlayerLoopHelpers.UpdateQueue.Create(frames);
+                    lock (PlayerLoopHelpers.UpdateQueueLock)
+                    {
+                        return PlayerLoopHelpers.UpdateQueue.Create(frames);
+                    }
 
                 case PlayerLoopTiming.LateUpdate:
-                    return PlayerLoopHelpers.LateUpdateQueue.Create(frames);
+                    lock (PlayerLoopHelpers.LateUpdateQueueLock)
+                    {
+                        return PlayerLoopHelpers.LateUpdateQueue.Create(frames);
+                    }
 
                 case PlayerLoopTiming.FixedUpdate:
-                    return PlayerLoopHelpers.FixedUpdateQueue.Create(frames);
+                    lock (PlayerLoopHelpers.FixedUpdateQueueLock)
+                    {
+                        return PlayerLoopHelpers.FixedUpdateQueue.Create(frames);
+                    }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
