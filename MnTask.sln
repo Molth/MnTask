@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MnTask", "MnTask\MnTask.csproj", "{4E4FEB0D-946C-4100-9D1F-A840F8D66DCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MnTimer", "MnTimer\MnTimer.csproj", "{F5A8F7D0-505D-4CF1-A383-ADCE50B02017}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{FBA142A2-3949-4E65-8152-20410DC07F32}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{4E4FEB0D-946C-4100-9D1F-A840F8D66DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E4FEB0D-946C-4100-9D1F-A840F8D66DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E4FEB0D-946C-4100-9D1F-A840F8D66DCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5A8F7D0-505D-4CF1-A383-ADCE50B02017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5A8F7D0-505D-4CF1-A383-ADCE50B02017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5A8F7D0-505D-4CF1-A383-ADCE50B02017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5A8F7D0-505D-4CF1-A383-ADCE50B02017}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBA142A2-3949-4E65-8152-20410DC07F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBA142A2-3949-4E65-8152-20410DC07F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBA142A2-3949-4E65-8152-20410DC07F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBA142A2-3949-4E65-8152-20410DC07F32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
