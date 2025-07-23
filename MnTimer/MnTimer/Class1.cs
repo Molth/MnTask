@@ -52,7 +52,7 @@ namespace Erinn
         ulong Timestamp { get; set; }
         ulong SequenceNumber { get; set; }
         MnTimerState State { get; set; }
-        Type? Type { get; set; }
+        Type Type { get; }
 
         void OnComplete();
         void Reset();
@@ -77,7 +77,7 @@ namespace Erinn
         public ulong Timestamp { get; set; }
         public ulong SequenceNumber { get; set; }
         public MnTimerState State { get; set; }
-        public Type? Type { get; set; }
+        public Type Type => !typeof(T).IsValueType ? typeof(object) : typeof(T);
 
         public void OnComplete()
         {
@@ -192,7 +192,6 @@ namespace Erinn
                 item.Timestamp = _timestamp + delay;
                 item.SequenceNumber = ++_sequenceNumber;
                 item.State = MnTimerState.Running;
-                item.Type = typeof(object);
                 promise = item;
             }
             else
@@ -203,7 +202,6 @@ namespace Erinn
                 item.Timestamp = _timestamp + delay;
                 item.SequenceNumber = ++_sequenceNumber;
                 item.State = MnTimerState.Running;
-                item.Type = typeof(T);
                 promise = item;
             }
 
