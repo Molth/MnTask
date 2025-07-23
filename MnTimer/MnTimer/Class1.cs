@@ -227,6 +227,7 @@ namespace Erinn
                     {
                         RemoveRootNode();
                         Return(node);
+                        node.Reset();
                         if (_size == 0)
                             break;
                     }
