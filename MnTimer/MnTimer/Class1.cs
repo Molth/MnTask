@@ -53,6 +53,7 @@ namespace Erinn
         ulong SequenceNumber { get; set; }
         MnTimerState State { get; set; }
         Type Type { get; }
+        bool IsCreated { get; }
 
         void OnComplete();
         void Reset();
@@ -78,6 +79,7 @@ namespace Erinn
         public ulong SequenceNumber { get; set; }
         public MnTimerState State { get; set; }
         public Type Type => !typeof(T).IsValueType ? typeof(object) : typeof(T);
+        public bool IsCreated => FunctionPointer != null;
 
         public void OnComplete()
         {
@@ -220,7 +222,18 @@ namespace Erinn
             {
                 var node = _nodes[0];
                 if (node!.Timestamp > timestamp)
+                {
+                    for (; !node!.IsCreated; node = _nodes[0])
+                    {
+                        RemoveRootNode();
+                        Return(node);
+                        if (_size == 0)
+                            break;
+                    }
+
                     break;
+                }
+
                 RemoveRootNode();
                 Return(node);
                 node.OnComplete();
