@@ -191,9 +191,6 @@ namespace Erinn
                 var item = (MnTimerPromise<object>)Rent<object>();
                 item.FunctionPointer = (delegate* managed<object?, void>)functionPointer;
                 item.Arg = arg;
-                item.Timestamp = _timestamp + delay;
-                item.SequenceNumber = ++_sequenceNumber;
-                item.State = MnTimerState.Running;
                 promise = item;
             }
             else
@@ -201,12 +198,12 @@ namespace Erinn
                 var item = (MnTimerPromise<T>)Rent<T>();
                 item.FunctionPointer = functionPointer;
                 item.Arg = arg;
-                item.Timestamp = _timestamp + delay;
-                item.SequenceNumber = ++_sequenceNumber;
-                item.State = MnTimerState.Running;
                 promise = item;
             }
 
+            promise.Timestamp = _timestamp + delay;
+            promise.SequenceNumber = ++_sequenceNumber;
+            promise.State = MnTimerState.Running;
             var size = _size;
             if (_nodes.Length == size)
                 Grow(size + 1);
